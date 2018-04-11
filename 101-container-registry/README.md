@@ -26,7 +26,6 @@ This is an overview of the solution
 
 The following resources are deployed as part of the solution
 
-+ **Storage Account**: Storage account used by Container Registry for storing its data
 + **Azure Container Registry**: Docker image registry
 
 ## Deployment steps
@@ -42,5 +41,3 @@ Follow [this documentation](https://docs.microsoft.com/en-us/azure/container-reg
 #### Push images to your registry
 
 For pushing docker images on your registry, follow [this documentation](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli)
-
-
