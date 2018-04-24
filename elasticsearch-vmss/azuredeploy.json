@@ -52,7 +52,7 @@
     }
   },
   "variables": {
-    "storageAccountType": "Premium_LRS",
+    "storageAccountType": "Standard_LRS",
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
     "namingInfix": "[toLower(parameters('vmssName'))]",
@@ -74,8 +74,8 @@
     "sshProbeId": "[concat(variables('loadBalancerId'),'/probes/sshProbe')]",
     "subnetName": "[concat(variables('namingInfix'), '-subnet')]",
     "vmStorageAccountContainerName": "vhds",
-    "masterSize": "Standard_DS3_v2",
-    "vmSku": "Standard_DS4_v2",
+    "masterSize": "Standard_D2_v2",
+    "vmSku": "Standard_D2_v2",
     "imageReference": {
       "publisher": "Canonical",
       "offer": "UbuntuServer",
@@ -250,7 +250,7 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "platformUpdateDomainCount": 3,
-        "platformFaultDomainCount": 3,
+        "platformFaultDomainCount": 2,
         "managed": true
       }
     },
