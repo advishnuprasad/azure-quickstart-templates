@@ -386,7 +386,7 @@
       "properties": {
         "ipConfigurations": [
           {
-            "name": "[variables('jumpBoxIPConfigName')]",
+            "name": "jumpbox-ipconfig",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
