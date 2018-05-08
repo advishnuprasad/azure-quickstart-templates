@@ -56,14 +56,18 @@
     "addressPrefix": "10.0.0.0/16",
     "subnetPrefix": "10.0.0.0/24",
     "namingInfix": "[toLower(parameters('vmssName'))]",
+    "jumpBoxName": "jumpbox-vm",
     "domainNameLabel": "[variables('namingInfix')]",
+    "JumpBoxdomainNameLabel": "[concat(variables('namingInfix'), 'jumpbox')]",
     "virtualNetworkName": "[concat(variables('namingInfix'), '-vnet')]",
     "publicIpAddressName": "[concat(variables('namingInfix'), '-pip')]",
+    "JumpBoxPublicIpAddressName": "[concat(variables('namingInfix'), '-jumpbox-pip')]",
     "publicIpAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpAddressName'))]",
     "loadBalancerName": "[concat(variables('namingInfix'), '-lb')]",
     "loadBalancerId": "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
     "backendPoolName": "[concat(variables('namingInfix'), '-bepool')]",
     "nicName": "[concat(variables('namingInfix'), '-nic')]",
+    "jumpBoxNicName": "[concat(variables('namingInfix'), 'jumpobox-nic')]",
     "masterName": "[concat(variables('namingInfix'), '-master')]",
     "availabilitySetName": "[concat(variables('namingInfix'), '-master-set')]",
     "nsgName": "[concat(variables('namingInfix'), '-master-nsg')]",
@@ -154,6 +158,18 @@
         "publicIPAllocationMethod": "Dynamic",
         "dnsSettings": {
           "domainNameLabel": "[variables('domainNameLabel')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('JumpBoxPublicIpAddressName')]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('JumpBoxdomainNameLabel')]"
         }
       }
     },
@@ -357,6 +373,68 @@
           }
         }
       ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('jumpBoxNicName')]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2017-04-01",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('JumpBoxPublicIpAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[variables('jumpBoxIPConfigName')]",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('JumpBoxPublicIpAddressName'))]"
+              },
+              "subnet": {
+                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName')), '/subnets/', variables('subnetName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('jumpBoxName')]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2017-03-30",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('jumpBoxNicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSku')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('jumpBoxName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": "[variables('imageReference')]",
+          "osDisk": {
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "[variables('storageAccountType')]"
+            }
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('jumpBoxNicName'))]"
+            }
+          ]
+        }
+      }
     },
     {
       "type": "Microsoft.Compute/virtualMachineScaleSets",
